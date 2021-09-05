@@ -1,3 +1,12 @@
-from django.shortcuts import render
+from django.shortcuts import render, redirect
+from .models import Product
 
-# Create your views here.
+
+def add_product(request, pk):
+    """
+    Добавляем 10 ед. товара
+    """
+    product = Product.objects.get(pk=pk)
+    product.quantity += 10
+    product.save()
+    return redirect('/admin/electronic/product')

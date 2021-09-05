@@ -37,9 +37,7 @@ class Product(models.Model):
     """
     Модель товара
     """
-    code = models.CharField('Код товара', max_length=8, unique=True,
-                            default=''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8)),
-                            help_text='Код генерируется автоматически, к изменению недоступен')
+    code = models.CharField('Код товара', max_length=8, unique=True, editable=False)
     category = models.ForeignKey(Category, on_delete=models.CASCADE, verbose_name='Категория')
     manufacturer = models.ForeignKey(Manufacturer, on_delete=models.CASCADE, verbose_name='Производитель')
     name = models.CharField('Название товара', max_length=200)
@@ -56,11 +54,22 @@ class Product(models.Model):
 
     def save(self, *args, **kwargs):
         """
+        При создании товара, генерим код длиной 8 символов
         Проверяем старое кол-во товара, если товар изменился, меняем дату на актуальную
         """
+        if self.pk is None:
+            self.code = ''.join(random.choice(string.ascii_letters + string.digits) for _ in range(8))
+
         if self.old_quantity != self.quantity:
             self.update_date = datetime.now()
+
         return super().save(*args, **kwargs)
+
+    def get_cost(self):
+        """
+        Подсчет стоимость товара
+        """
+        return self.price * self.quantity
 
     def __str__(self):
         return self.name
